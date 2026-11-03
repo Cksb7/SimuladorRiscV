@@ -1,7 +1,5 @@
 # SimuladorRiscV
 
-Simulador de uma CPU baseada na arquitetura RISC-V, desenvolvido em C#.
-
 O projeto tem como objetivo implementar e simular o funcionamento dos principais componentes de um processador, desde a busca e decodificação das instruções até sua execução.
 
 ## Funcionalidades implementadas
