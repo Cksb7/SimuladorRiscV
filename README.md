@@ -1,8 +1,8 @@
 # Simulador RISC-V
 
-Simulador educacional de uma CPU baseada na arquitetura RISC-V, desenvolvido em C# como projeto acadêmico de Ciência da Computação.
+Simulador educacional de uma CPU baseada na arquitetura RISC-V de 32 bits (RV32I), desenvolvido em C#.
 
-O objetivo é implementar e compreender progressivamente os principais componentes de um processador, explorando a busca, decodificação e execução de instruções de 32 bits.
+O projeto tem como objetivo compreender e implementar progressivamente os principais componentes de um processador, desde a busca e decodificação até a execução de instruções, incluindo operações aritméticas, lógicas, desvios e acesso à memória.
 
 **Status:** Em desenvolvimento.
 
@@ -10,59 +10,67 @@ O objetivo é implementar e compreender progressivamente os principais component
 
 ### Componentes da CPU
 
-- **Memória de instruções:** armazenamento e leitura de instruções de 32 bits por endereço.
-- **Contador de Programa (PC):** controle do endereço da próxima instrução, com avanço sequencial de 4 bytes.
-- **Banco de registradores:** implementação dos 32 registradores de propósito geral (x0 a x31), incluindo a proteção do registrador x0, que permanece sempre em zero.
-- **Decodificador:** identificação do formato da instrução pelo opcode e identificação das operações pelos campos de função.
-- **ULA (Unidade Lógica e Aritmética):** execução de operações aritméticas, lógicas e de deslocamento.
+- **Contador de Programa (PC):** controle do endereço da próxima instrução, com avanço sequencial e suporte a desvios e saltos.
+- **Banco de registradores:** implementação dos 32 registradores de propósito geral (x0 a x31), incluindo a proteção do registrador x0.
+- **Decodificador:** identificação dos formatos e das operações por meio dos campos da instrução.
+- **ULA (Unidade Lógica e Aritmética):** execução de operações aritméticas, lógicas, comparações e deslocamentos.
+- **Memória de instruções:** armazenamento e leitura de instruções de 32 bits.
+- **Memória de dados:** suporte a leitura e escrita de palavras de 32 bits.
+- **Mapa de memória:** identificação e validação das regiões de memória disponíveis.
 
 ### Instruções suportadas
 
-Atualmente, o simulador executa 19 instruções dos formatos R e I da arquitetura RV32I.
+O simulador implementa 30 instruções da base RV32I, além de uma instrução personalizada.
 
-**Formato R — Operações entre registradores**
-
-| Instrução | Descrição |
+| Formato | Instruções |
 |---|---|
-| ADD | Adição |
-| SUB | Subtração |
-| SLL | Deslocamento lógico à esquerda |
-| SLT | Comparação menor que (com sinal) |
-| SLTU | Comparação menor que (sem sinal) |
-| XOR | OU exclusivo |
-| SRL | Deslocamento lógico à direita |
-| SRA | Deslocamento aritmético à direita |
-| OR | OU lógico |
-| AND | E lógico |
+| R | ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND |
+| I | ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI, LW |
+| S | SW |
+| B | BEQ, BNE, BLT, BGE, BLTU, BGEU |
+| U | LUI, AUIPC |
+| J | JAL |
+| Custom-0 | BSWAP |
 
-**Formato I — Operações com imediato**
+**Instrução personalizada BSWAP:** inverte a ordem dos quatro bytes de um registrador de 32 bits. Exemplo: `0x12345678` resulta em `0x78563412`.
 
-| Instrução | Descrição |
-|---|---|
-| ADDI | Adição com imediato |
-| SLTI | Comparação menor que (com sinal) |
-| SLTIU | Comparação menor que (sem sinal) |
-| XORI | OU exclusivo com imediato |
-| ORI | OU lógico com imediato |
-| ANDI | E lógico com imediato |
-| SLLI | Deslocamento lógico à esquerda com imediato |
-| SRLI | Deslocamento lógico à direita com imediato |
-| SRAI | Deslocamento aritmético à direita com imediato |
+## Sistema de memória
 
-### Decodificação e execução
+O simulador possui um mapa de endereçamento com as seguintes regiões:
 
-O fluxo atual de execução contempla:
+| Região | Endereço inicial | Endereço final | Capacidade |
+|---|---|---|---|
+| RAM principal | 0x00000 | 0x7FFFF | 512 KiB |
+| VRAM | 0x80000 | 0x8FFFF | 64 KiB |
+| Reservada | 0x90000 | 0x9FBFF | — |
+| Periféricos | 0x9FC00 | 0x9FFFF | — |
 
-1. Busca da instrução na memória utilizando o endereço indicado pelo PC.
-2. Extração do opcode e identificação do formato da instrução.
-3. Extração dos campos necessários para interpretar a instrução.
-4. Identificação da operação pelo decodificador.
-5. Leitura dos registradores de origem ou obtenção do imediato.
-6. Execução da operação na ULA.
-7. Escrita do resultado no registrador de destino.
-8. Atualização do contador de programa.
+Endereços a partir de `0xA0000` estão fora do mapa de memória.
 
-O simulador também implementa a extensão de sinal dos imediatos de 12 bits para 32 bits e o tratamento específico do campo de deslocamento (shamt) nas instruções SLLI, SRLI e SRAI.
+### Características da memória
+
+- Armazenamento de palavras de 32 bits.
+- Organização Little-Endian.
+- Verificação de alinhamento de endereços.
+- Validação dos limites das regiões de memória.
+- Bloqueio de acessos a regiões reservadas, periféricos não implementados e endereços fora do mapa.
+
+### Integração SW/LW
+
+As instruções SW e LW estão integradas à execução da CPU, permitindo armazenar e recuperar valores tanto na RAM principal quanto na VRAM.
+
+## Testes e validações
+
+O programa principal contém cenários de teste para verificar:
+
+- Identificação das regiões do mapa de memória.
+- Leitura e escrita na RAM principal e na VRAM.
+- Acesso aos limites das regiões de memória.
+- Bloqueio de acessos desalinhados.
+- Tratamento de regiões reservadas e periféricos.
+- Integração das instruções SW e LW com a CPU.
+- Execução de instruções dos formatos R, I, S, B, U e J.
+- Execução da instrução personalizada BSWAP.
 
 ## Tecnologias utilizadas
 
@@ -73,44 +81,30 @@ O simulador também implementa a extensão de sinal dos imediatos de 12 bits par
 
 ## Como executar o projeto
 
-### Pré-requisitos
+**Pré-requisito:** .NET 10 SDK instalado.
 
-- .NET 10 SDK instalado.
-- Git instalado.
-
-### Clonando o repositório
+Clone o repositório:
 
 ```bash
 git clone https://github.com/Cksb7/SimuladorRiscV.git
 ```
 
-### Acessando a pasta do projeto
+Entre na pasta do projeto:
 
 ```bash
 cd SimuladorRiscV
 ```
 
-### Executando o simulador
+Execute o simulador:
 
 ```bash
 dotnet run --project SimuladorRiscV/SimuladorRiscV.csproj
 ```
 
-As instruções utilizadas nos testes são definidas diretamente no programa, permitindo acompanhar a decodificação, os operandos, os resultados da ULA e o estado final dos registradores.
+## Equipe
 
-## Próximas implementações
+Projeto desenvolvido em grupo.
 
-O projeto está sendo desenvolvido progressivamente. Entre as próximas etapas estão:
+---
 
-- Implementação das instruções dos formatos S, B, U e J.
-- Implementação de leitura e escrita na memória de dados.
-- Expansão do fluxo de execução da CPU.
-- Implementação da instrução especial BSWAP.
-- Ampliação dos testes e validações.
-- Organização e refatoração da estrutura principal do simulador.
-
-**Observação:** o reconhecimento de alguns formatos adicionais pelo opcode já está previsto no decodificador, mas suas funcionalidades de execução ainda estão em desenvolvimento.
-
-## Sobre o projeto
-
-Projeto desenvolvido em grupo, com foco no estudo de arquitetura de computadores, organização de processadores, representação de instruções e funcionamento de uma CPU baseada na arquitetura RISC-V.
+**Em desenvolvimento contínuo.**
