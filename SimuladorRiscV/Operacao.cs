@@ -1,4 +1,5 @@
-﻿namespace SimuladorRiscV
+﻿
+namespace SimuladorRiscV
 {
     internal enum Operacao
     {
@@ -27,8 +28,31 @@
         // Deslocamentos imediatos
         Slli,
         Srli,
-        Srai
+        Srai,
+
+        // Acesso à memória
+        Sw,
+        Lw,
+
+        // Formato B - Branch
+        Beq,
+        Bne,
+        Blt,
+        Bge,
+        Bltu,
+        Bgeu,
+
+        // Formato U
+        Lui,
+        Auipc,
+
+        // Formato J
+        Jal,
+
+        // Instrução bswap
+        Bswap
     }
 }
+
 
 

@@ -1,8 +1,8 @@
-﻿namespace SimuladorRiscV
+﻿
+namespace SimuladorRiscV
 {
     internal class Decodificador
     {
-
         public Operacao IdentificarOperacao(uint opcode, uint funct3, uint funct7)
         {
             switch ((opcode, funct3, funct7))
@@ -43,12 +43,14 @@
         }
 
 
-
         public Operacao IdentificarOperacaoI(
             uint opcode, uint funct3, uint campoSuperiorImediato)
         {
             switch ((opcode, funct3))
             {
+                case (0b0000011u, 0b010u):
+                    return Operacao.Lw;
+
                 case (0b0010011u, 0b000u):
                     return Operacao.Addi;
 
@@ -90,6 +92,95 @@
         }
 
 
+        public Operacao IdentificarOperacaoS(uint opcode, uint funct3)
+        {
+            switch ((opcode, funct3))
+            {
+                case (0b0100011u, 0b010u):
+                    return Operacao.Sw;
+
+                default:
+                    return Operacao.NaoReconhecida;
+            }
+        }
+
+
+        public Operacao IdentificarOperacaoB(uint opcode, uint funct3)
+        {
+            switch ((opcode, funct3))
+            {
+                case (0b1100011u, 0b000u):
+                    return Operacao.Beq;
+
+                case (0b1100011u, 0b001u):
+                    return Operacao.Bne;
+
+                case (0b1100011u, 0b100u):
+                    return Operacao.Blt;
+
+                case (0b1100011u, 0b101u):
+                    return Operacao.Bge;
+
+                case (0b1100011u, 0b110u):
+                    return Operacao.Bltu;
+
+                case (0b1100011u, 0b111u):
+                    return Operacao.Bgeu;
+
+                default:
+                    return Operacao.NaoReconhecida;
+            }
+        }
+
+
+        // Formato U
+        public Operacao IdentificarOperacaoU(uint opcode)
+        {
+            switch (opcode)
+            {
+                // LUI - Load Upper Immediate
+                case 0b0110111u:
+                    return Operacao.Lui;
+
+                // AUIPC - Add Upper Immediate to PC
+                case 0b0010111u:
+                    return Operacao.Auipc;
+
+                default:
+                    return Operacao.NaoReconhecida;
+            }
+        }
+
+
+        // Formato J
+        public Operacao IdentificarOperacaoJ(uint opcode)
+        {
+            switch (opcode)
+            {
+                // JAL - Jump and Link
+                case 0b1101111u:
+                    return Operacao.Jal;
+
+                default:
+                    return Operacao.NaoReconhecida;
+            }
+        }
+
+
+        // BSWAP 
+        public Operacao IdentificarOperacaoCustom(uint opcode)
+        {
+            switch (opcode)
+            {
+                // BSWAP - Byte Swap
+                case 0b0001011u:
+                    return Operacao.Bswap;
+
+                default:
+                    return Operacao.NaoReconhecida;
+            }
+        }
+
 
         public FormatoInstrucao IdentificarFormato(uint opcode)
         {
@@ -117,7 +208,7 @@
                     return FormatoInstrucao.J;
 
                 case 0b0001011u:
-                    return FormatoInstrucao.Custom; //bswap
+                    return FormatoInstrucao.Custom;
 
                 default:
                     return FormatoInstrucao.NaoReconhecido;
@@ -125,5 +216,3 @@
         }
     }
 }
-
-
