@@ -105,6 +105,3 @@ dotnet run --project SimuladorRiscV/SimuladorRiscV.csproj
 
 Projeto desenvolvido em grupo.
 
----
-
-**Em desenvolvimento contínuo.**
